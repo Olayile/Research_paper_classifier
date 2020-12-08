@@ -11,5 +11,7 @@
 
 ## Architecture
 
+![Architecture](https://github.com/Olayile/Research_paper_classifier/blob/master/Architecture.jpg)
+
 ## Tools used
 NLPK
