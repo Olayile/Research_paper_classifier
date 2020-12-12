@@ -5,10 +5,11 @@ import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-title_vectorizer = open("final_news_cv_vectorizer.pkl","rb")
-title_cv = joblib.load(title_vectorizer)
+# title_vectorizer = open("final_news_cv_vectorizer.pkl","rb")
+# title_cv = joblib.load(title_vectorizer)
 
 # FUNCTIONS
 
@@ -21,29 +22,43 @@ def get_key(val,my_dict):
         if val == value:
             return key
 
+def getDTMByTFIDF(titles,nfeatures):
+    
+    tfIdf_vectorizer = TfidfVectorizer(max_features=nfeatures)
+    dtm = tfIdf_vectorizer.fit_transform(titles).toarray()
+    return dtm, tfIdf_vectorizer
+
 
 def main():
     st.title("Journal Paper Classifier")
     # st.subheader("ML App with Streamlit")
 
     paper_title = st.text_area("Add your title here" ,"Type Here")
+    paper_title =[paper_title]
 
     models =  ['SVM', 'NB', 'RF']
     model_choice = st.selectbox("Select Model",models)
 
     if st.button("Classify"):
         st.text("Original Text::\n{}".format(paper_title))
-        vect_text = title_cv.transform([paper_title]).toarray()
-
+        # vect_text = title_cv.transform([paper_title]).toarray()
+# TO DO: the vectorization is giving errors
         if model_choice == 'SVM':
             predictor = load_prediction_models("SVM_model.sav")
-            prediction = predictor.predict(vect_text)
+            vect = load_prediction_models('vect_model.sav')
+            tf1_new = TfidfVectorizer(max_features = None, vocabulary = vect.vocabulary_)
+            vect_text = tf1_new.fit_transform(paper_title)
 
-            final_result = get_key(prediction,prediction_labels)
-            st.success("News Categorized as:: {}".format(final_result))
+            # vect_text = vect.transform(paper_title)
+            prediction = predictor.predict(vect_text)
+            st.write(prediction)
+
+            # final_result = get_key(prediction,prediction_labels)
+            st.success("Your predicted Journal is: {}".format(prediction[0]))
             
 
     st.sidebar.title("Journal Paper Classifier")
+    st.sidebar.markdown('How does it work?')
 
 
 
